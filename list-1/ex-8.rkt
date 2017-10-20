@@ -9,11 +9,11 @@
 (define (fix f)
   (self-app (prepare-cont f)))
 
-(define (fact-maker f)
+(define (fact-maker next)
     (lambda (n)
       (if (= n 0)
           1
-          (* n (f (- n 1))))))
+          (* n (next (- n 1))))))
 
 (define (fact n)
   ((fix fact-maker) n))
