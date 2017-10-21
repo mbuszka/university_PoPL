@@ -2,11 +2,8 @@
 
 ; Exercise B.1 from EoPL
 
-(provide scan&parse
-         an-expr
-         a-term
-         fact-num
-         fact-expr)
+(provide lexical-spec
+         grammar)
 
 (require rackunit)
 
