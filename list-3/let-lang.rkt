@@ -1,9 +1,11 @@
 #lang eopl
 
 (require rackunit
-         "../list-2/ex-1.rkt")
+         (only-in racket foldl)
+         "../list-2/ex-1.rkt"
+         "../util.rkt")
 
-;;; Exercise 1 and 2 (3.9 and 3.10 from EoPL
+;;; Exercises 1, 2 and 3 (3.9, 3.10 and 3.17 from EoPL)
 
 ;;; Data types
 
@@ -50,6 +52,7 @@
 (define value-of
   (lambda (exp env)
     (cases expression exp
+
       ; Exercise 1
       (cons-exp (hd tl)
                 (let ((head (value-of hd env))
@@ -69,7 +72,17 @@
                    (let ((head (value-of hd env))
                          (tail (map (lambda (x) (value-of x env)) tl)))
                      (list-val (cons head tail))))))
-      
+
+      ; Exercise 3
+      (let*-exp (var exp1 vars exps exp2)
+                (let* ((lets (zip vars exps))
+                       (env1 (foldl
+                              (lambda (pair acc)
+                                (extend-env (car pair) (value-of (cdr pair) acc) acc))
+                              env
+                              (cons (cons var exp1) lets))))
+                  (value-of exp2 env1)))
+                  
       (const-exp (num) (num-val num))
       (var-exp (var) (apply-env env var))
       (diff-exp (exp1 exp2)
@@ -142,6 +155,13 @@
     (expression ("list" "(" list-literal) list-exp)
     (list-literal (")") empty-list)
     (list-literal (expression (arbno "," expression) ")") non-empty-list)
+
+    ; Exercise 3
+    (expression
+     ("let*" identifier "=" expression
+             (arbno identifier "=" expression)
+             "in" expression)
+     let*-exp)
     ))
 
 (sllgen:make-define-datatypes lexical-spec grammar)
@@ -151,6 +171,7 @@
 ;;; Tests
 
 (test-begin
+ ; Exercises 1 and 2
  (check-equal?
   (run "list (1, 2, 3)")
   (list-val (list (num-val 1) (num-val 2) (num-val 3))))
@@ -168,4 +189,12 @@
   (run "let x = 2 in x"))
  (check-equal?
   (run "tail (list (1, 2, 3, 4))")
-  (run "list (2, 3, 4)")))
+  (run "list (2, 3, 4)"))
+
+ ;Exercise 3
+ (check-equal?
+  (run "let x = 30 in let* x = - (x, 1) y = - (x, 2) in - (x, y)")
+  (num-val 2))
+ (check-equal?
+  (run "let* x = 1 x = -(4, x) x = - (x, 8) y = x in y")
+  (num-val -5)))
