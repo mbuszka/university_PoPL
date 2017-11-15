@@ -99,4 +99,7 @@
   (num-val 3))
  (check-equal?
   (run "let x = 1 in let f = proc (y) - (x, y) in let x = 4 in (f 1)")
-  (num-val 3)))
+  (num-val 3))
+ (check-equal?
+  (run "let x = 15 in let g = (proc (x) proc (y) - (x, y) 5) in (g 3)")
+  (num-val 12)))
