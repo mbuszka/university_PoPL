@@ -1,5 +1,5 @@
 (module interp (lib "eopl.ss" "eopl")
-  
+
   ;; interpreter for the LETREC language.  The \commentboxes are the
   ;; latex code for inserting the rules into the code in the book.
   ;; These are too complicated to put here, see the text, sorry.
@@ -15,7 +15,7 @@
 ;;;;;;;;;;;;;;;; the interpreter ;;;;;;;;;;;;;;;;
 
   ;; value-of-program : Program -> ExpVal
-  (define value-of-program 
+  (define value-of-program
     (lambda (pgm)
       (cases program pgm
         (a-program (exp1)
@@ -49,7 +49,7 @@
               (if (zero? num1)
                 (bool-val #t)
                 (bool-val #f)))))
-              
+
         ;\commentbox{\ma{\theifspec}}
         (if-exp (exp1 exp2 exp3)
           (let ((val1 (value-of exp1 env)))
@@ -58,11 +58,11 @@
               (value-of exp3 env))))
 
         ;\commentbox{\ma{\theletspecsplit}}
-        (let-exp (var exp1 body)       
+        (let-exp (var exp1 body)
           (let ((val1 (value-of exp1 env)))
             (value-of body
               (extend-env var val1 env))))
-        
+
         (proc-exp (var body)
           (proc-val (procedure var body env)))
 
@@ -71,9 +71,9 @@
                 (arg (value-of rand env)))
             (apply-procedure proc arg)))
 
-        (letrec-exp (p-name b-var p-body letrec-body)
+        (letrec-exp (p-names b-vars p-bodies letrec-body)
           (value-of letrec-body
-            (extend-env-rec p-name b-var p-body env)))
+            (extend-env-rec p-names b-vars p-bodies env)))
 
         )))
 
@@ -84,9 +84,5 @@
       (cases proc proc1
         (procedure (var body saved-env)
           (value-of body (extend-env var arg saved-env))))))
-  
+
   )
-  
-
-
-  

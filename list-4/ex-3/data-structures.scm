@@ -2,7 +2,9 @@
 
   ;; data structures for letrec-lang.
 
-  (require "lang.scm")                  ; for expression?
+  (require "lang.scm"
+           (only-in racket foldl)
+           racket/match)
 
   (provide (all-defined-out))               ; too many things to list
 
@@ -15,7 +17,7 @@
       (value number?))
     (bool-val
       (boolean boolean?))
-    (proc-val 
+    (proc-val
       (proc proc?)))
 
 ;;; extractors:
@@ -59,15 +61,41 @@
   ;; Page: 86
   (define-datatype environment environment?
     (empty-env)
-    (extend-env 
+    (extend-env
       (bvar symbol?)
-      (bval (lambda (x) (or (expval? x) (vector? x))))
+      (bval expval?)
+      (saved-env environment?))
+    ;; Recursively extended environment contains list od identifiers and a vector
+    ;; of precedure bodies
+    (extended-env-rec
+      (p-names (list-of symbol?))
+      (procedures vector?)
       (saved-env environment?)))
 
-  (define (extend-env-rec p-name p-var body saved-env)
-    (let* ((vec (make-vector 1))
-           (new-env (extend-env p-name vec saved-env)))
-      (vector-set! vec 0
-                   (proc-val (procedure p-var body new-env)))
+
+  ;;; Exercise 3 (3.36 from EoPL)
+  ;; Helper function wich zips two lists
+  (define (zip lst-1 lst-2)
+    (match (cons lst-1 lst-2)
+      ((cons '() _) '())
+      ((cons _ '()) '())
+      ((cons (cons h1 t1) (cons h2 t2)) (cons (cons h1 h2) (zip t1 t2)))))
+
+  (define (extend-env-rec p-names p-vars bodies saved-env)
+    (let* ((vec (make-vector (length p-names)))
+           ;; first create new environment with uninitialized vector
+           (new-env (extended-env-rec p-names vec saved-env))
+           (pairs (zip p-vars bodies))
+           ;; then create all procedures with this new environment
+           (procs (map (lambda (p)
+                         (proc-val (procedure (car p) (cdr p) new-env)))
+                         pairs)))
+      ;; finally put the procedures inside vector
+      (foldl (lambda (p n)
+               (vector-set! vec n p)
+               (+ n 1))
+             0
+             procs)
+      ;; and return this new environment
       new-env))
 )

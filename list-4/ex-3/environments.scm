@@ -1,14 +1,15 @@
-(module environments (lib "eopl.ss" "eopl") 
-  
-  ;; builds environment interface, using data structures defined in
-  ;; data-structures.scm. 
+(module environments (lib "eopl.ss" "eopl")
 
-  (require "data-structures.scm")
+  ;; builds environment interface, using data structures defined in
+  ;; data-structures.scm.
+
+  (require "data-structures.scm"
+           (only-in racket index-of))
 
   (provide init-env empty-env extend-env apply-env)
 
 ;;;;;;;;;;;;;;;; initial environment ;;;;;;;;;;;;;;;;
-  
+
   ;; init-env : () -> Env
   ;; usage: (init-env) = [i=1, v=5, x=10]
   ;; (init-env) builds an environment in which i is bound to the
@@ -16,9 +17,9 @@
   ;; bound to the expressed value 10.
   ;; Page: 69
 
-  (define init-env 
+  (define init-env
     (lambda ()
-      (extend-env 
+      (extend-env
        'i (num-val 1)
        (extend-env
         'v (num-val 5)
@@ -35,10 +36,13 @@
         (empty-env ()
           (eopl:error 'apply-env "No binding for ~s" search-sym))
         (extend-env (var val saved-env)
-	  (if (eqv? search-sym var)
-	    (if (vector? val)
-                (vector-ref val 0)
-                val)
-	    (apply-env saved-env search-sym))))))
-    
+	        (if (eqv? search-sym var)
+	          val
+	          (apply-env saved-env search-sym)))
+        (extended-env-rec (p-names procedures saved-env)
+          (let ((idx (index-of p-names search-sym)))
+            (if idx
+              (vector-ref procedures idx)
+              (apply-env saved-env search-sym)))))))
+
   )
