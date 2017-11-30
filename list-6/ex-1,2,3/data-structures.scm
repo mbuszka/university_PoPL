@@ -60,6 +60,9 @@
       (body expression?)
       (env environment?)))
 
+  (define (proc->var p) (cases proc p (procedure (v b e) v)))
+  (define (proc->body p ) (cases proc p (procedure (v b e) b)))
+
   (define-datatype environment environment?
     (empty-env)
     (extend-env 

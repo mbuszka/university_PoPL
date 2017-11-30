@@ -132,6 +132,13 @@ let f = proc (x) proc (y)
 in ((f 44) 33)"
 	12)
 
+      (letrec-set "
+print letrec
+  a (x) = (b x)
+  b (x) = begin set a = 4; a end
+in (a 7)" 4)
+
+      
       (book-example-1 "var x = 3, y = 4; { x = 3; y = 4; print -(x, y) }" -1)
 
       (book-example-2 "
@@ -160,6 +167,23 @@ var f = 0, x = 0;
 ; print ((f 4) x) }" 1)
 
       (initializer-interdependence "var x = 5, y = -(x, 1); print y" 4)
-      
+
+      (recursive-block-1 "
+var even = proc (x) if zero?(x) then 1 else (odd -(x, 1))
+  , odd  = proc (x) if zero?(x) then 0 else (even -(x, 1));
+print (even 13)" 0)
+
+      (recursive-block-2 "
+var even = proc (d) if zero?(v) then 1 else begin set v = -(v, 1); (odd 42) end
+  , odd  = proc (d) if zero?(v) then 0 else begin set v = -(v, 1); (even 42) end
+  , v = 42;
+{ v = 13
+; print (even 42) }" 0)
+
+      (recursive-block-3 "
+var a = proc (x) (b x)
+  , b = proc (x) begin set a = 4; a end
+; print (a 7)" 4)
+  
       ))
   )

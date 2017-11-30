@@ -121,14 +121,36 @@
             (apply-smt smt1 env)
             (loop))))
       (var-smt (vars exprs smt1)
-        (let ((new-env (foldl
-                        (lambda (v acc)
-                          (extend-env
-                           (car v)
-                           (newref (value-of (cdr v) acc))
-                           acc))
-                        env
-                        (zip vars exprs))))
+;        (let* ((pairs (zip vars (map (lambda (x) (value-of x env)) exprs)))
+;               (procs&rest (foldl
+;                            (lambda (v acc)
+;                              (cases proc (cdr v)
+;                                (procedure (var b e)
+;                                  (cons (cons v (car acc)) (cdr acc)))
+;                                (else
+;                                  (cons (car acc) (cons v (cdr acc))))))
+;                            (cons '() '())))
+;               (env1 (foldl
+;                      (lambda (v acc)
+;                        (extend-env
+;                         (car v)
+;                         (newref (value-of (cdr v) acc))
+;                         acc))
+;                      env
+;                      (cdr procs&rest)))
+;               (procs (car procs&rest))
+;               (p-names (map car procs))
+;               (p-vars (map (lambda (x) (proc->var (cdr x))) procs))
+;               (p-bodies (map (lambda (x) (proc->body (cdr x))) procs))
+;               (env2 (extend-env-rec* p-names p-vars p-bodies env1)))
+;          (apply-smt smt1 env2)))
+        (let ((new-env (foldl (lambda (v acc) (extend-env v (newref 'un) acc))
+                               env
+                               vars)))
+          (for-each (lambda (v)
+                      (setref! (apply-env new-env (car v))
+                               (value-of (cdr v) new-env)))
+                    (zip vars exprs))
           (apply-smt smt1 new-env)))
       ))
 
