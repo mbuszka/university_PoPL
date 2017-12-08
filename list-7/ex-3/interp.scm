@@ -47,7 +47,7 @@
                         (begin
                           (initialize-store!)
                           (set! prints '())
-                          (result-of exp1 (init-env) end-c-cont)
+                          (result-of exp1 (init-env) (end-c-cont))
                           (reverse prints))))))
 
   (define (result-of smt env cont)
@@ -104,17 +104,32 @@
                     (value-of/k exp1 env (set-cont (apply-env env var) cont)))
         )))
 
-  (define (block-c-cont smts env cont)
-    (lambda () (if (null? smts)
-                   (apply-c-cont cont)
-                   (result-of (car smts) env (block-c-cont (cdr smts) env cont)))))
 
-  (define (while-c-cont exp env cont)
-    (lambda () (value-of/k exp env cont)))
+  ;;; Control Continuations
+  ;; Procedural representation
 
-  (define (end-c-cont) (eopl:printf "End of computation.\n"))
+  ; (define (block-c-cont smts env cont)
+    ; (lambda () (if (null? smts)
+                   ; (apply-c-cont cont)
+                   ; (result-of (car smts) env (block-c-cont (cdr smts) env cont)))))
+; 
+  ; (define (while-c-cont exp env cont)
+    ; (lambda () (value-of/k exp env cont)))
+; 
+  ; (define (end-c-cont) (eopl:printf "End of computation.\n"))
+; 
+  ; (define (apply-c-cont cont) (cont))
 
-  (define (apply-c-cont cont) (cont))
+  ;; Data Structure Representation
+  (define (apply-c-cont cont)
+    (cases control-continuation cont
+           (end-c-cont () (eopl:printf "End of computation.\n"))
+           (while-c-cont (exp env s-cont)
+                         (value-of/k exp env s-cont))
+           (block-c-cont (smts env s-cont)
+                         (if (null? smts)
+                             (apply-c-cont s-cont)
+                             (result-of (car smts) env (block-c-cont (cdr smts) env s-cont))))))
 
   ;; apply-cont : Cont * ExpVal -> FinalAnswer
   ;; Page: 148

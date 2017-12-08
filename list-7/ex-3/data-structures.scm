@@ -6,7 +6,18 @@
   (provide (all-defined-out))               ; too many things to list
 
 
-  (define control-continuation? procedure?)
+  ; (define control-continuation? procedure?)
+
+  (define-datatype control-continuation control-continuation?
+    (while-c-cont
+     (exp expression?)
+     (env environment?)
+     (cont continuation?))
+    (block-c-cont
+     (smts (list-of statement?))
+     (env environment?)
+     (cont control-continuation?))
+    (end-c-cont))
 
 ;;;;;;;;;;;;;;;; expressed values ;;;;;;;;;;;;;;;;
 
