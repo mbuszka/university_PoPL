@@ -15,48 +15,24 @@ typedef enum {
 
 typedef struct expression {
   expr_tag tag;
-  union {
-    int e_const;
+  int num;
+  char* var;
 
-    char* e_var;
+  struct expression* lhs;
+  struct expression* rhs;
 
-    struct {
-      struct expression* lhs;
-      struct expression* rhs;
-    } e_diff;
+  struct expression* then_e;
+  struct expression* else_e;
 
-    struct expression* e_zero;
+  struct expression* exp;
+  struct expression* body;
 
-    struct {
-      struct expression* cond;
-      struct expression* then_e;
-      struct expression* else_e;
-    } e_if;
-
-    struct {
-      char *var;
-      struct expression* exp;
-      struct expression* body;
-    } e_let;
-
-    struct {
-      char* var;
-      struct expression* body;
-      struct expression* exp;
-    } e_proc;
-
-    struct {
-      struct expression* lhs;
-      struct expression* rhs;
-    } e_call;
-
-    struct {
-      char* p_name;
-      char* var;
-      struct expression* body;
-      struct expression* exp;
-    } e_letrec;
-  } data;
+  char* p_name;
 } expr_t;
+
+expr_t* make_const(int n);
+expr_t* make_var(char *n);
+expr_t* make_diff(expr_t* l, expr_t* r);
+expr_t* make_let(char* var, expr_t* exp, expr_t* body);
 
 #endif

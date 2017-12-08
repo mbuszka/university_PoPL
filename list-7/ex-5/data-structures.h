@@ -25,11 +25,9 @@ typedef enum {
 
 typedef struct {
   expval_tag tag;
-  union {
-    int v_num;
-    int v_bool;
-    proc_t v_proc;
-  } data;
+  int v_num;
+  int v_bool;
+  proc_t v_proc;
 } expval_t;
 
 expval_t inj_num(int n);
@@ -67,41 +65,15 @@ typedef enum {
 
 typedef struct continuation {
   cont_tag tag;
-  union {
-    struct {
-      struct continuation* cont;
-    } c_zero;
 
-    struct {
-      char* var;
-      expr_t* body;
-      env_t* env;
-      struct continuation* cont;
-    } c_let;
-
-    struct {
-      expr_t* then_e;
-      expr_t* else_e;
-      env_t* env;
-      struct continuation* cont;
-    } c_if;
-
-    struct bin_op_1 {
-      expr_t* exp;
-      env_t* env;
-      struct continuation* cont;
-    } c_diff_1;
-
-    struct bin_op_2 {
-      expval_t val;
-      struct continuation* cont;
-    } c_diff_2;
-
-    struct bin_op_1 c_rator;
-
-    struct bin_op_2 c_rand;
-
-  } data;
+  struct continuation* cont;
+  env_t*   env;
+  char*    var;
+  expval_t val;
+  expr_t*  body;
+  expr_t*  then_e;
+  expr_t*  else_e;
+  expr_t*  exp;
 } cont_t;
 
 cont_t* make_cont(cont_tag tag);

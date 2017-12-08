@@ -7,7 +7,21 @@
 expval_t inj_num(int n) {
   expval_t v;
   v.tag = num_val;
-  v.data.v_num = n;
+  v.v_num = n;
+  return v;
+}
+
+expval_t inj_bool(int n) {
+  expval_t v;
+  v.tag = bool_val;
+  v.v_bool = n;
+  return v;
+}
+
+expval_t inj_proc(proc_t proc) {
+  expval_t v;
+  v.tag = proc_val;
+  v.v_proc = proc;
   return v;
 }
 
