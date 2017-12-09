@@ -21,7 +21,7 @@ bounce_t value_of(expr_t* exp, env_t* env, cont_t* cont) {
   case zero_exp: {
     cont_t* new_cont = make_cont(zero_cont);
     new_cont->cont = cont;
-    return value_of(exp->exp, env, cont);
+    return value_of(exp->exp, env, new_cont);
   }
 
   case if_exp: {
@@ -115,11 +115,18 @@ bounce_t apply_cont(cont_t* cont, expval_t val) {
   }
 
   case rand_cont: {
-    if (cont->val.tag != proc_val)
+    if (cont->val.tag != proc_val) {
+      printf("Operator is %d\n", cont->val.tag);
       abort("Expected operator to be a procedure");
+    }
     proc_t proc = cont->val.v_proc;
     env_t* new_env = extend_env(proc.env, proc.var, val);
-    return value_of(proc.body, new_env, cont->cont);
+    bounce_t thunk;
+    thunk.tag = thunk_bnc;
+    thunk.exp = proc.body;
+    thunk.env = new_env;
+    thunk.cont = cont->cont;
+    return thunk;
   }
   }
 }
