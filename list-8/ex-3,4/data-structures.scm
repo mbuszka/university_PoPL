@@ -14,7 +14,7 @@
       (value number?))
     (bool-val
       (boolean boolean?))
-    (proc-val 
+    (proc-val
       (proc proc?))
     (list-val
       (lst (list-of expval?))))
@@ -56,11 +56,16 @@
 
 ;;;;;;;;;;;;;;;; procedures ;;;;;;;;;;;;;;;;
 
+  (define continuation? pair?)
+
   (define-datatype proc proc?
     (procedure
-      (bvar symbol?)
-      (body expression?)
-      (env environment?)))
+     (bvar symbol?)
+     (body expression?)
+     (env environment?))
+    (cont-p
+     (cont continuation?))
+    )
 
 ;;;;;;;;;;;;;;;; environment structures ;;;;;;;;;;;;;;;;
 
@@ -78,7 +83,7 @@
   (define environment?
     (list-of
       (lambda (p)
-        (and 
+        (and
           (pair? p)
           (symbol? (car p))))))
 

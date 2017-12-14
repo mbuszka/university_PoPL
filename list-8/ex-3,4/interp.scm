@@ -75,7 +75,11 @@
 
         (raise-exp (exp1)
           (value-of/k exp1 env
-            (raise-cont cont))))))
+                      (raise-cont cont)))
+
+        (letcc-exp (var exp1)
+                   (value-of/k exp1 (extend-env var (proc-val (cont-p cont)) env) cont))
+        )))
 
   ;; apply-cont : continuation * expval -> final-expval
 
@@ -139,7 +143,10 @@
         (procedure (var body saved-env)
           (value-of/k body
             (extend-env var arg saved-env)
-            cont)))))
+            cont))
+        (cont-p (cont1)
+                (apply-cont cont1 arg))
+        )))
 
 
   (define apply-unop
